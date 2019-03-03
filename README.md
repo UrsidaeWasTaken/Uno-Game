@@ -3,14 +3,15 @@
 ![alt text][logo]
 An implementation of the popular **_UNO Card Game_** using Python.
 
+<code>&nbsp;</code>
 
-
-<img src="https://dl.myket.ir/newresizing/resize/medium/png/icon/d5347673-d016-40fd-915c-de81ae74a169_.png" width="60" height="60"/>
+<code>&nbsp;</code>
 
 **2-4 Players**. Each player starts with 7 cards each. The game follows basic Uno rules.
 
-UNO RULES HERE: https://www.unorules.com/
+**UNO RULES HERE:** https://www.unorules.com/
 
+<code>&nbsp;</code>
 
 ### Type of cards
 
