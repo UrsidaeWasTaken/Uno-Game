@@ -5,8 +5,6 @@ An implementation of the popular **_UNO Card Game_** using Python.
 
 <code>&nbsp;</code>
 
-<code>&nbsp;</code>
-
 **2-4 Players**. Each player starts with 7 cards each. The game follows basic Uno rules.
 
 **UNO RULES HERE:** https://www.unorules.com/
