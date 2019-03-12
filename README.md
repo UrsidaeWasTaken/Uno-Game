@@ -3,6 +3,12 @@
 ![alt text][logo]
 An implementation of the popular **_UNO Card Game_** using Python.
 
+**Master** - The stable and official version. Only updated with fully tested and playable version, not for unstable or features in development. Currently old/original UNO Game version.
+
+**Develop** - Latest development and features for next release. All approved features will be added into here and devloped on until stable enough for release. Currently fixing bugs and revisiting optimisation.
+
+**Features** - Experimental features that are unstable and not fully tested. Approved features will be moved into the Develop branch until good enough for release. 
+
 <code>&nbsp;</code>
 
 **2-4 Players**. Each player starts with 7 cards each. The game follows basic Uno rules.
