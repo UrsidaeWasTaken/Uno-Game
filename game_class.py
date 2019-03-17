@@ -89,6 +89,7 @@ class PlayerCycle(object):
     def reverse_cycle(self):
         self.is_reversed = not self.is_reversed
 
+
 class Settings(object):
     def __init__(self):
         self.options = {"2 Players": '2', "3 Players": '3', "4 Players": '4'}
@@ -107,6 +108,7 @@ class Settings(object):
                 temp = Table(int(prompt_choice[0]))
                 return PlayerCycle(temp)
             print(("\nERROR: {} is not an option...").format(prompt_choice.title()))
+
 
 class Game(object):
     def __init__(self, table_setting):
@@ -253,5 +255,4 @@ class Game(object):
                 break
             if len(self.table.current_deck) == 1:
                 print("UNO: Player {} has ONE card remaining...!")
-            game.__next__()
- 
+            self.__next__()
