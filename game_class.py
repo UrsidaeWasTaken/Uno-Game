@@ -4,7 +4,7 @@ import random
 
 # Base Cards = Cards & Settings that'll be needed throughout the program
 colours = ["Red", "Yellow", "Green", "Blue"]
-actions = ["Reverse", "Skip", "2+", "4+", ""]
+actions = ["Reverse", "Skip", "2+", "Wild 4+", "Wild"]
 
 # Display borders
 thin_borders = "-" * 35
@@ -13,26 +13,29 @@ thick_borders = "=" * 35
 
 # Each Card contains a value and a type
 class Card(object):
-    def __init__(self, colour=None, card_type=None):
+    def __init__(self, colour=None, card_type=None, is_starter=False):
         self.colour = colour
         self.type = card_type
+        self.starter = is_starter
         self.card = "%s %s" % (self.colour, self.type)
 
         # Randomly generates a card 
         if not colour:
             chance = random.random()
 
-            if chance >= 0.4 or self.type == "starter":
+            if chance >= 0.4 or self.starter:
                 self.colour = random.choice(colours)
                 self.type = random.randint(1,9)
-            elif chance <= 0.1:
-                self.colour = "Wild"
-                self.type = random.choice(actions[3:])
             else:
                 self.colour = random.choice(colours)
                 self.type = random.choice(actions[:3])
 
             self.card = "%s %s" % (self.colour, self.type)
+
+            if chance <= 0.1 and not self.starter:
+                self.colour = None
+                self.type = random.choice(actions[3:])
+                self.card = self.type
 
 
 class Deck(object):
@@ -86,81 +89,163 @@ class PlayerCycle(object):
     def reverse_cycle(self):
         self.is_reversed = not self.is_reversed
 
+def settings():
+    options = {"2 Players": '2', "3 Players": '3', "4 Players": '4'}
+    def display_settings():
+        print(thick_borders+"\n\nSelect Number of Players\n\n"+thin_borders+"\n")
+        for i, option in enumerate(options):
+            print('-  '+str(option))
+        print("\n"+thick_borders+"\n")
+        
+    def prompt():
+        display_settings()
+        while True:
+            prompt_choice = input("Select Option: ")
+            if prompt_choice.title() in options.keys() or prompt_choice in options.values():
+                temp = Table(int(prompt_choice[0]))
+                return PlayerCycle(temp)
+            print(("\nERROR: {} is not an option...").format(prompt_choice.title()))
+
+    return prompt()
 
 class Game(object):
     def __init__(self):
-        self.table = None
+        self.table = settings()
         self.round = 1
-        self.pile_card = Card(None,"starter")
+        self.pile_card = Card(None, None, True)
 
     def __next__(self):
         self.table.current_player = self.table.continue_cycle
-    
-    def settings(self):
-        options = {"2 Players": '2', "3 Players": '3', "4 Players": '4'}
-        def display_settings():
-            print(thick_borders+"\n\nSelect Number of Players\n\n"+thin_borders+"\n")
 
-            for i, option in enumerate(options):
-                print('-  '+str(option))
-            print("\n"+thick_borders+"\n")
-            
-        def prompt():
-            display_settings()
+    def display_hand(self):
+        print("\nIt is PLAYER %s's turn!" % str(self.table.current_player+1))
+        input("Press ENTER when you're ready!")
+
+        print("\n\n"+thin_borders+"\n-> YOUR HAND\n"+thin_borders+"\n")
+        for i, card in enumerate(self.table.current_deck):
+            print("%s| %s" % (i+1, card.card))
+        print("\n"+thin_borders)
+
+    def prompts(self, choice):
+        def player_turn():
+            self.display_hand()
+
             while True:
-                prompt_choice = input("Select Option: ")
-
-                if prompt_choice.title() in options.keys() or prompt_choice in options.values():
-                    temp = Table(int(prompt_choice[0]))
-                    self.table = PlayerCycle(temp)
-                    break
-
-        return prompt()
-
-    def game(self):
-        def prompts(choice):
-            def player_turn():
-                print("\nIt is PLAYER %s's turn!" % str(self.table.current_player + 1))
-                input("Press ENTER when you're ready!")
-
-                print("\n\n"+thin_borders+"\n-> YOUR HAND\n"+thin_borders+"\n")
-                for i, card in enumerate(self.table.current_deck):
-                    print("%s| %s" % (i+1, card.card))
-                print("\n"+thin_borders)
-                
-                while True:
-                    print("LAST CARD: %s" % self.pile_card.card)
-                    user_choice = input("Select a card or (D)raw: ")
-                    try:
-                        user_choice = int(user_choice)
-                        if 0 < int(user_choice) <= len(self.table.current_deck):
-                            if not vaildate_card(self.table.current_deck[int(user_choice) - 1]):
-                                print(("\nERROR: {} does not match the symbol or colour of {}...").format(self.table.current_deck[int(user_choice) - 1].card, self.pile_card.card))
-                            else:
-                                print("\nMatch")
-                                break
+                print("LAST CARD: %s" % self.pile_card.card)
+                user_choice = input("Select a card or (D)raw: ")
+                try:
+                    user_choice = int(user_choice) - 1
+                    if -1 < user_choice <= len(self.table.current_deck)-1:
+                        if not self.vaildate_card(self.table.current_deck[user_choice], user_choice):
+                            print(("\nERROR: {} does not match the symbol or colour of {}...")\
+                                .format(self.table.current_deck[user_choice].card, self.pile_card.card))
                         else:
-                            if len(self.table.current_deck) < 3:
-                                print(("\nERROR: You only have {} card/s to select from...").format(len(self.table.current_deck)))
-                            else:
-                                print(("\nERROR: {} is not within range 1 and {}...").format(user_choice, len(self.table.current_deck)))
-                    except ValueError:
-                        if user_choice.lower() == "d" or user_choice.lower() == "draw":
-                            print("draw")
-                            # Draw function
+                            break
+                    else:
+                        if len(self.table.current_deck) < 3:
+                            print(("\nERROR: You only have {} card/s to select from...").format(len(self.table.current_deck)))
                         else:
-                            print(("\nERROR: {} is not an option. Please select a card or (D)raw...").format(user_choice))
+                            print(("\nERROR: {} is not within range 1 and {}...").format(user_choice, len(self.table.current_deck)))
+                except (TypeError, ValueError):
+                    if user_choice.lower() == "d" or user_choice.lower() == "draw":
+                        self.draw(1)
+                        break
+                    else:
+                        print(("\nERROR: {} is not an option. Please select a card or (D)raw...").format(user_choice))
 
-            if choice == 1:
-                return player_turn()
-        
-        def vaildate_card(user_card, valid_card=self.pile_card):
-            if user_card.colour is not "Wild":
-                if (user_card.colour != valid_card.colour) and (user_card.type != valid_card.type):
-                    return False
-                else:
-                    self.pile_card = user_card
-                    return True
+        if choice == 1:
+            return player_turn()
+    
+    def vaildate_card(self, user_card, card_index):
+        if user_card.colour:
+            if (user_card.colour != self.pile_card.colour) and (user_card.type != self.pile_card.type):
+                return False
             else:
-                return True
+                self.pile_card = user_card
+                del self.table.current_deck[card_index]
+                if user_card.type == "Reverse":
+                    self.table.reverse_cycle()
+                elif user_card.type == "Skip":
+                    self.__next__()
+                elif user_card.type == "2+":
+                    self.penalty_cards(2)
+        else:
+            self.pile_card = self.choose_colour(user_card.type)
+            del self.table.current_deck[card_index]
+            if user_card.type == "Wild 4+":
+                self.penalty_cards(4)
+        return True
+
+    def choose_colour(self, type):
+        print("\n"+thick_borders)
+        for colour in colours:
+            print(("• {}").format(colour))
+        print(thick_borders)
+
+        while True:
+            new_colour = input("Select new colour: ").title()
+            if new_colour in colours:
+                new_card = Card(new_colour, type)
+                print(("Player {} has changed the colour to {}").format(self.table.current_player+1, new_colour))
+                return new_card
+            print(("\nERROR: {} is not an option...").format(new_colour))
+    
+    def penalty_cards(self, penalty):
+        self.__next__()
+        multiplier = 1
+        while True:
+            if self.penalty(penalty, multiplier):
+                break
+            multiplier += 1
+            self.__next__()
+        print(("\nPENALTY: Player {} must draw {} cards...").format(self.table.current_player+1, multiplier*penalty))
+        self.draw(multiplier*penalty)
+        return multiplier
+
+    def penalty(self, penalty_score, multiplier):
+        playable_card = False
+
+        for card in self.table.current_deck:
+            if card.type == self.pile_card.type:
+                playable_card = True
         
+        self.display_hand()
+        if playable_card:
+            print(("PENALTY WARNING: You must either counter with a {} card or (D)raw {} cards from the pile...\n")\
+                .format(self.pile_card.type, multiplier*penalty_score))
+            while True:
+                print("LAST CARD: %s" % self.pile_card.card)
+                user_choice = input("Select a card or (D)raw: ")
+                try:
+                    user_choice = int(user_choice) - 1
+                    if -1 < user_choice <= len(self.table.current_deck)-1:
+                        if self.table.current_deck[user_choice].type != self.pile_card.type:
+                            print(("\nPlease counter with either a {} card or (D)raw {} cards from the pile...")\
+                                .format(self.pile_card.type, multiplier*penalty_score))
+                        else:
+                            if penalty_score is 4:
+                                self.pile_card = self.choose_colour("Wild 4+")
+                            del self.table.current_deck[user_choice]
+                            return False
+                    else:
+                        print(("\nERROR: {} is not within range").format(user_choice))
+                except (TypeError, ValueError):
+                    if user_choice.lower() == "d" or user_choice.lower() == "draw":
+                        return True
+                    else:
+                        print(("\nERROR: {} is not an option. Please counter with a {} card or (D)raw {} cards from the pile...")\
+                            .format(user_choice, self.pile_card.type, multiplier*penalty_score))
+        print(("You have no {} cards to counter...").format(self.pile_card.type))
+        return True
+
+
+    def draw(self, num_of_cards):
+        for i in range(num_of_cards):
+            drawn_card = Card()
+            print(("\nDRAWN CARD: Player {} draws '{}'!").format(self.table.current_player+1, drawn_card.card))
+            self.table.current_deck.append(drawn_card)
+
+game = Game()
+while True:
+    game.prompts(1)
+    game.__next__()
