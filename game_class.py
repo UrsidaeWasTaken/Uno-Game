@@ -89,28 +89,28 @@ class PlayerCycle(object):
     def reverse_cycle(self):
         self.is_reversed = not self.is_reversed
 
-def settings():
-    options = {"2 Players": '2', "3 Players": '3', "4 Players": '4'}
-    def display_settings():
+class Settings(object):
+    def __init__(self):
+        self.options = {"2 Players": '2', "3 Players": '3', "4 Players": '4'}
+        
+    def display_settings(self):
         print(thick_borders+"\n\nSelect Number of Players\n\n"+thin_borders+"\n")
-        for i, option in enumerate(options):
+        for i, option in enumerate(self.options):
             print('-  '+str(option))
         print("\n"+thick_borders+"\n")
         
-    def prompt():
-        display_settings()
+    def prompt(self):
+        self.display_settings()
         while True:
             prompt_choice = input("Select Option: ")
-            if prompt_choice.title() in options.keys() or prompt_choice in options.values():
+            if prompt_choice.title() in self.options.keys() or prompt_choice in self.options.values():
                 temp = Table(int(prompt_choice[0]))
                 return PlayerCycle(temp)
             print(("\nERROR: {} is not an option...").format(prompt_choice.title()))
 
-    return prompt()
-
 class Game(object):
-    def __init__(self):
-        self.table = settings()
+    def __init__(self, table_setting):
+        self.table = table_setting
         self.round = 1
         self.pile_card = Card(None, None, True)
 
@@ -245,7 +245,13 @@ class Game(object):
             print(("\nDRAWN CARD: Player {} draws '{}'!").format(self.table.current_player+1, drawn_card.card))
             self.table.current_deck.append(drawn_card)
 
-game = Game()
-while True:
-    game.prompts(1)
-    game.__next__()
+    def start_game(self):
+        while True:
+            self.prompts(1)
+            if not self.table.current_deck:
+                print(("\nPLAYER {} HAS WON!!!").format(self.table.current_player+1))
+                break
+            if len(self.table.current_deck) == 1:
+                print("UNO: Player {} has ONE card remaining...!")
+            game.__next__()
+ 
