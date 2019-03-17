@@ -7,8 +7,8 @@ colours = ["Red", "Yellow", "Green", "Blue"]
 actions = ["Reverse", "Skip", "2+", "Wild 4+", "Wild"]
 
 # Display borders
-thin_borders = "-" * 35
-thick_borders = "=" * 35
+thin_borders = "-" * 25
+thick_borders = "=" * 25
 
 
 # Each Card contains a value and a type
@@ -95,7 +95,7 @@ class Settings(object):
         self.options = {"2 Players": '2', "3 Players": '3', "4 Players": '4'}
         
     def display_settings(self):
-        print(thick_borders+"\n\nSelect Number of Players\n\n"+thin_borders+"\n")
+        print("\n"+thick_borders+"\n\nSelect Number of Players\n\n"+thin_borders+"\n")
         for i, option in enumerate(self.options):
             print('-  '+str(option))
         print("\n"+thick_borders+"\n")
@@ -111,8 +111,8 @@ class Settings(object):
 
 
 class Game(object):
-    def __init__(self, table_setting):
-        self.table = table_setting
+    def __init__(self):
+        self.table = Settings().prompt()
         self.round = 1
         self.pile_card = Card(None, None, True)
 
@@ -120,6 +120,7 @@ class Game(object):
         self.table.current_player = self.table.continue_cycle
 
     def display_hand(self):
+        sleep(1)
         print("\nIt is PLAYER %s's turn!" % str(self.table.current_player+1))
         input("Press ENTER when you're ready!")
 
@@ -179,6 +180,7 @@ class Game(object):
         return True
 
     def choose_colour(self, type):
+        sleep(1)
         print("\n"+thick_borders)
         for colour in colours:
             print(("• {}").format(colour))
@@ -188,6 +190,7 @@ class Game(object):
             new_colour = input("Select new colour: ").title()
             if new_colour in colours:
                 new_card = Card(new_colour, type)
+                sleep(1)
                 print(("Player {} has changed the colour to {}").format(self.table.current_player+1, new_colour))
                 return new_card
             print(("\nERROR: {} is not an option...").format(new_colour))
@@ -201,6 +204,7 @@ class Game(object):
             multiplier += 1
             self.__next__()
         print(("\nPENALTY: Player {} must draw {} cards...").format(self.table.current_player+1, multiplier*penalty))
+        sleep(1)
         self.draw(multiplier*penalty)
         return multiplier
 
@@ -238,12 +242,14 @@ class Game(object):
                         print(("\nERROR: {} is not an option. Please counter with a {} card or (D)raw {} cards from the pile...")\
                             .format(user_choice, self.pile_card.type, multiplier*penalty_score))
         print(("You have no {} cards to counter...").format(self.pile_card.type))
+        sleep(1)
         return True
 
 
     def draw(self, num_of_cards):
         for i in range(num_of_cards):
             drawn_card = Card()
+            sleep(.5)
             print(("\nDRAWN CARD: Player {} draws '{}'!").format(self.table.current_player+1, drawn_card.card))
             self.table.current_deck.append(drawn_card)
 
@@ -251,8 +257,11 @@ class Game(object):
         while True:
             self.prompts(1)
             if not self.table.current_deck:
-                print(("\nPLAYER {} HAS WON!!!").format(self.table.current_player+1))
+                sleep(1)
+                print(("\nPLAYER {} HAS WON!!!\n\n").format(self.table.current_player+1))
+                sleep(5)
                 break
             if len(self.table.current_deck) == 1:
-                print("UNO: Player {} has ONE card remaining...!")
+                sleep(0.5)
+                print(("\nUNO: Player {} has ONE card remaining...!").format(self.table.current_player+1))
             self.__next__()
