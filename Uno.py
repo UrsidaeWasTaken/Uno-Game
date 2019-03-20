@@ -15,7 +15,7 @@ Wild Card - Allows the player to choose the next colour. Can be played on any ty
                If the previous one was also a 4+ card, the score will add up for the next player.
 """
 
-import unoGame as uno
+import UnoGame as uno
 from time import sleep
 
 options = ['PLAY', 'EXIT']
