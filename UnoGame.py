@@ -119,8 +119,19 @@ class Game(object):
     def __next__(self):
         self.table.current_player = self.table.continue_cycle
 
+    def check_players(self):
+        if not self.table.current_deck:
+            return True
+        if len(self.table.current_deck) == 1:
+            sleep(0.5)
+            print(("\nUNO: Player {} has ONE card remaining...!").format(self.table.current_player+1))
+        
+        return False
+
     def display_hand(self):
         sleep(1)
+        if self.check_players():
+            return True
         print("\nIt is PLAYER %s's turn!" % str(self.table.current_player+1))
         input("Press ENTER when you're ready!")
 
@@ -131,7 +142,8 @@ class Game(object):
 
     def prompts(self, choice):
         def player_turn():
-            self.display_hand()
+            if self.display_hand():
+                return
 
             while True:
                 print("LAST CARD: %s" % self.pile_card.card)
@@ -148,13 +160,13 @@ class Game(object):
                         if len(self.table.current_deck) < 3:
                             print(("\nERROR: You only have {} card/s to select from...").format(len(self.table.current_deck)))
                         else:
-                            print(("\nERROR: {} is not within range 1 and {}...").format(user_choice, len(self.table.current_deck)))
+                            print(("\nERROR: {} is not within range 1 and {}...").format(user_choice+1, len(self.table.current_deck)))
                 except (TypeError, ValueError):
                     if user_choice.lower() == "d" or user_choice.lower() == "draw":
                         self.draw(1)
                         break
                     else:
-                        print(("\nERROR: {} is not an option. Please select a card or (D)raw...").format(user_choice))
+                        print(("\nERROR: '{}' is not an option. Please select a card or (D)raw...").format(user_choice))
 
         if choice == 1:
             return player_turn()
@@ -231,6 +243,7 @@ class Game(object):
                         else:
                             if penalty_score is 4:
                                 self.pile_card = self.choose_colour("Wild 4+")
+                            self.pile_card = self.table.current_deck[user_choice]
                             del self.table.current_deck[user_choice]
                             return False
                     else:
@@ -239,7 +252,7 @@ class Game(object):
                     if user_choice.lower() == "d" or user_choice.lower() == "draw":
                         return True
                     else:
-                        print(("\nERROR: {} is not an option. Please counter with a {} card or (D)raw {} cards from the pile...")\
+                        print(("\nERROR: '{}' is not an option. Please counter with a {} card or (D)raw {} cards from the pile...")\
                             .format(user_choice, self.pile_card.type, multiplier*penalty_score))
         print(("You have no {} cards to counter...").format(self.pile_card.type))
         sleep(1)
@@ -256,12 +269,9 @@ class Game(object):
     def start_game(self):
         while True:
             self.prompts(1)
-            if not self.table.current_deck:
+            if self.check_players():
                 sleep(1)
                 print(("\nPLAYER {} HAS WON!!!\n\n").format(self.table.current_player+1))
                 sleep(5)
                 break
-            if len(self.table.current_deck) == 1:
-                sleep(0.5)
-                print(("\nUNO: Player {} has ONE card remaining...!").format(self.table.current_player+1))
             self.__next__()
