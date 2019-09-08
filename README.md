@@ -3,7 +3,7 @@
 ![alt text][logo]
 An implementation of the popular **_UNO Card Game_** using Python.
 
-**Master** - The stable and official version. Only updated with fully tested and playable version, not for unstable or features in development. Currently UNO v1.1.0
+**Master** - The stable and official version. Only updated with fully tested and playable version, not for unstable or features in development. Currently UNO v1.1.1
 
 **Develop** - Latest development and features for next release. All approved features will be added into here and devloped on until stable enough for release.
 
